@@ -1,0 +1,40 @@
+---
+import Navigation from '../components/Navigation.astro';
+import '../styles/global.css';
+const pageTitle = "About Me - Anthony Martinez";
+
+const identity = {
+	firstName: "Anthony",
+	hobbies: ['baseball', 'music', 'drawing']
+}
+---
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{pageTitle}</title>
+		<style>
+			h1 { 
+				color: purple;
+				font-size: 4rem;	
+			}
+			.skill {
+				color: green;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+		<Navigation />
+		<p>some facts about me:</p>
+		<h1>
+			<ul>
+				{identity.hobbies.length >= 2 && 
+					<li class="hobby">Two of my hobbies are: {identity.hobbies[0]} and {identity.hobbies[1]}</li>
+				}
+			</ul>
+		</h1>
+	</body>
+</html>
