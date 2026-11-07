@@ -1,47 +1,89 @@
-# Astro Starter Kit: Minimal
+# Personal site: Next.js + Payload CMS
 
-```sh
-npm create astro@latest -- --template minimal
+A personal website with a built-in admin panel. Payload 3 runs inside the
+Next.js app, so you have one project, one server and one deploy.
+
+- **Public site:** home (hero, about, featured work, recent writing, contact),
+  `/projects`, `/projects/[slug]`, `/blog`, `/blog/[slug]`
+- **Admin panel:** `/admin`, where you edit everything on the site
+- **Database:** SQLite by default (a single file, no setup). Turso/libSQL also works.
+
+## Getting started
+
+Requires Node 20.9+.
+
+```bash
+npm install
+cp .env.example .env          # then set PAYLOAD_SECRET to a long random string
+npm run dev
 ```
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/minimal)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/minimal)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/minimal/devcontainer.json)
+1. Open http://localhost:3000/admin and create your first (admin) user.
+2. Go to **Settings → Profile & site settings** and fill in your name, headline,
+   intro, photo, links and email. Save.
+3. Add entries under **Content → Projects** and **Content → Blog posts**.
+   Click **Publish** when they are ready. Drafts never appear on the public site.
+4. Visit http://localhost:3000.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+In development, Payload updates the SQLite schema automatically whenever you change a
+collection.
 
-## 🚀 Project Structure
+## Project layout
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```
+src/
+  payload.config.ts        Payload config: database, collections, globals
+  collections/
+    Projects.ts            title, summary, cover, write-up, links, year, tags, featured
+    Posts.ts               title, excerpt, body, publish date
+    Media.ts               image/PDF uploads with resized variants
+    Users.ts               admin accounts
+  globals/
+    Profile.ts             your name, bio, avatar, résumé, contact links, SEO
+  app/
+    (frontend)/            the public site (layout, pages, styles.css)
+    (payload)/             admin panel + REST/GraphQL API (template boilerplate)
+  components/              ProjectCard, RichText, MediaImage, header/footer
+  lib/payload.ts           data fetching via Payload's Local API
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+## Customizing
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+- **Look and feel:** edit the CSS variables at the top of
+  `src/app/(frontend)/styles.css` (colors, radius, widths). It switches to a dark
+  theme automatically. Fonts are set in `src/app/(frontend)/layout.tsx`.
+- **New fields:** add them to a collection, then use them in a page. Run
+  `npm run generate:types` to write full TypeScript types to `src/payload-types.ts`.
+- **New page types:** add a collection in `src/collections`, register it in
+  `payload.config.ts`, and create a route in `src/app/(frontend)`.
 
-Any static assets, like images, can be placed in the `public/` directory.
+## Deploying
 
-## 🧞 Commands
+The site needs a Node server, since the admin panel and API run in the same app.
 
-All commands are run from the root of the project, from a terminal:
+**A VPS or any Node host (Railway, Render, Fly.io) with SQLite**
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+Mount a persistent disk for the `.db` file and the `media/` folder. In production,
+Payload doesn't change the schema automatically, so use migrations:
 
-## 👀 Want to learn more?
+```bash
+npm run payload migrate:create   # run locally after changing collections; commit the files
+npm run payload migrate          # run on the server before `npm start`
+npm run build && npm start
+```
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+**Vercel or other serverless hosts**
+
+These have no persistent disk:
+- Point `DATABASE_URI` at a Turso database (`libsql://...`) and set
+  `DATABASE_AUTH_TOKEN`, or switch to `@payloadcms/db-postgres`.
+- Store uploads with a storage plugin such as `@payloadcms/storage-vercel-blob`
+  or `@payloadcms/storage-s3`.
+
+Set `PAYLOAD_SECRET` and `NEXT_PUBLIC_SITE_URL` in your host's environment
+variables.
+
+## Version notes
+
+This project pins Next.js to 15.4.x, the line Payload's own templates use. Before
+you upgrade Next.js, check Payload's release notes for compatibility.
