@@ -9,7 +9,8 @@ export const Media: CollectionConfig = {
     group: 'Content',
   },
   upload: {
-    staticDir: 'media',
+    // Absolute path in production (set by docker-compose), ./media locally.
+    staticDir: process.env.MEDIA_DIR || 'media',
     mimeTypes: ['image/*', 'application/pdf'],
     imageSizes: [
       { name: 'thumbnail', width: 480 },

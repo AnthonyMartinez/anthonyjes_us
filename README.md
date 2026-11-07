@@ -61,16 +61,13 @@ src/
 
 The site needs a Node server, since the admin panel and API run in the same app.
 
-**A VPS or any Node host (Railway, Render, Fly.io) with SQLite**
+**Oracle Cloud VM (current setup):** see **[DEPLOY.md](./DEPLOY.md)**. It uses
+Docker Compose with Caddy for automatic HTTPS, and keeps SQLite and uploads on a
+persistent volume.
 
-Mount a persistent disk for the `.db` file and the `media/` folder. In production,
-Payload doesn't change the schema automatically, so use migrations:
-
-```bash
-npm run payload migrate:create   # run locally after changing collections; commit the files
-npm run payload migrate          # run on the server before `npm start`
-npm run build && npm start
-```
+**Migrations:** production doesn't change the database schema automatically.
+After you add or change fields, run `npm run migrate:create -- <name>` locally and
+commit `src/migrations/`. Pending migrations run when the server starts.
 
 **Vercel or other serverless hosts**
 

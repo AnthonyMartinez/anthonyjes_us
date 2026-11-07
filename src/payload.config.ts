@@ -10,6 +10,7 @@ import { Posts } from './collections/Posts'
 import { Projects } from './collections/Projects'
 import { Users } from './collections/Users'
 import { Profile } from './globals/Profile'
+import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,6 +38,9 @@ export default buildConfig({
       url: process.env.DATABASE_URI || 'file:./personal-site.db',
       authToken: process.env.DATABASE_AUTH_TOKEN,
     },
+    // In production, pending migrations in src/migrations run automatically
+    // when the server starts. Create them with `npm run migrate:create`.
+    prodMigrations: migrations,
   }),
   sharp,
 })
